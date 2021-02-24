@@ -1,4 +1,4 @@
-# Vue RFCs
+# RFCs
 
 ## What is an RFC?
 
