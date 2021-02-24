@@ -9,7 +9,7 @@ Many changes, including bug fixes and documentation improvements can be
 implemented and reviewed via the normal GitHub pull request workflow.
 
 Some changes though are "substantial", and we ask that these be put
-through a bit of a design process and produce a consensus among the Vue
+through a bit of a design process and produce a consensus among the fe 
 core team and the community.
 
 ## The RFC life-cycle
@@ -21,17 +21,16 @@ An RFC goes through the following stages:
 - **Landed:** when an RFC's proposed changes are shipped in an actual release.
 - **Rejected:** when an RFC PR is closed without being merged.
 
-[Pending RFC List](https://github.com/vuejs/rfcs/pulls)
+[Pending RFC List](https://github.com/4paradigm/rfcs/pulls)
 
 ## When to follow this process
 
 You need to follow this process if you intend to make "substantial"
 changes to one of the projects listed below:
 
-- [Vue core](https://github.com/vuejs/vue)
-- [Vue Router](https://github.com/vuejs/vue-router)
-- [Vuex](https://github.com/vuejs/vuex)
-- [Vue CLI](https://github.com/vuejs/vue-cli)
+- [HybirdSE](https://github.com/vuejs/vue)
+- [NativeSpark](https://github.com/vuejs/vue-router)
+- [FEDB](https://github.com/vuejs/vuex)
 
 We are limiting the RFC process for these repos to test out the process in a more manageable fashion, and may expand it to cover more projects under the `vuejs` organization in the future. For now, if you wish to suggest changes to those other projects, please use their respective issue lists.
 
@@ -75,7 +74,7 @@ RFC merged into the RFC repo as a markdown file. At that point the RFC
 is 'active' and may be implemented with the goal of eventual inclusion
 into Vue.
 
-* Fork the RFC repo http://github.com/vuejs/rfcs
+* Fork the RFC repo http://github.com/4paradigm/rfcs
 
 * Copy `0000-template.md` to `active-rfcs/0000-my-feature.md` (where
 'my-feature' is descriptive. don't assign an RFC number yet).
@@ -90,7 +89,7 @@ alternatives tend to be poorly-received**.
 * Build consensus and integrate feedback in the discussion thread. RFCs that have broad support are much more likely to make progress than those that don't receive any comments.
 
 * Eventually, the [core team] will decide whether the RFC is a candidate
-for inclusion in Vue.
+for inclusion in fe.
 
 * An RFC can be modified based upon feedback from the [core team] and community. Significant modifications may trigger a new final comment period.
 
@@ -136,8 +135,9 @@ feel free to ask (e.g. by leaving a comment on the associated issue).
 Members of the [core team] will attempt to review some set of open RFC
 pull requests on a regular basis. If a core team member believes an RFC PR is ready to be accepted into active status, they can approve the PR using GitHub's review feature to signal their approval of the RFC.
 
-**Vue's RFC process owes its inspiration to the [React RFC process], [Rust RFC process] and [Ember RFC process]**
+**FEDB's RFC process owes its inspiration to the [Vue RFC process], [React RFC process], [Rust RFC process] and [Ember RFC process]**
 
+[Vue RFC process]: https://github.com/vuejs/rfcs
 [React RFC process]: https://github.com/reactjs/rfcs
 [Rust RFC process]: https://github.com/rust-lang/rfcs
 [Ember RFC process]: https://github.com/emberjs/rfcs
