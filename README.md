@@ -136,7 +136,7 @@ feel free to ask (e.g. by leaving a comment on the associated issue).
 Members of the [core team] will attempt to review some set of open RFC
 pull requests on a regular basis. If a core team member believes an RFC PR is ready to be accepted into active status, they can approve the PR using GitHub's review feature to signal their approval of the RFC.
 
-**FEDB's RFC process owes its inspiration to the [Vue RFC process], [React RFC process], [Rust RFC process] and [Ember RFC process]**
+**4Paradigm's RFC process owes its inspiration to the [Vue RFC process], [React RFC process], [Rust RFC process] and [Ember RFC process]**
 
 [Vue RFC process]: https://github.com/vuejs/rfcs
 [React RFC process]: https://github.com/reactjs/rfcs
