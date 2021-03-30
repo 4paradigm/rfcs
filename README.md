@@ -28,9 +28,10 @@ An RFC goes through the following stages:
 You need to follow this process if you intend to make "substantial"
 changes to one of the projects listed below:
 
-- [HybirdSE](https://github.com/vuejs/vue)
-- [NativeSpark](https://github.com/vuejs/vue-router)
-- [FEDB](https://github.com/vuejs/vuex)
+- [pafka](https://github.com/4paradigm/pafka)
+- [HybirdSE](https://github.com/4paradigm/HybridSE.git)
+- [NativeSpark](https://github.com/4paradigm/NativeSpark.git)
+- [FEDB](https://github.com/4paradigm/fedb.git)
 
 We are limiting the RFC process for these repos to test out the process in a more manageable fashion, and may expand it to cover more projects under the `vuejs` organization in the future. For now, if you wish to suggest changes to those other projects, please use their respective issue lists.
 
