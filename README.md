@@ -33,7 +33,7 @@ changes to one of the projects listed below:
 - [NativeSpark](https://github.com/4paradigm/NativeSpark.git)
 - [FEDB](https://github.com/4paradigm/fedb.git)
 
-We are limiting the RFC process for these repos to test out the process in a more manageable fashion, and may expand it to cover more projects under the `vuejs` organization in the future. For now, if you wish to suggest changes to those other projects, please use their respective issue lists.
+We are limiting the RFC process for these repos to test out the process in a more manageable fashion, and may expand it to cover more projects under the `4paradigm` organization in the future. For now, if you wish to suggest changes to those other projects, please use their respective issue lists.
 
 What constitutes a "substantial" change is evolving based on community norms, but may include the following:
 
@@ -44,7 +44,7 @@ What constitutes a "substantial" change is evolving based on community norms, bu
 
 Some changes do not require an RFC:
 
-- Additions that strictly improve objective, numerical quality criteria (speedup, better browser support)
+- Additions that strictly improve objective, numerical quality criteria
 - Fixing objectively incorrect behavior
 - Rephrasing, reorganizing or refactoring
 - Addition or removal of warnings
@@ -56,7 +56,7 @@ submit an RFC first.
 
 ## Why do you need to do this
 
-It is great that you are considering suggesting new features or changes to Vue - we appreciate your willingness to contribute! However, as Vue becomes more widely used, we need to take stability more seriously, and thus have to carefully consider the impact of every change we make that may affect end users. On the other hand, we also feel that Vue has reached a stage where we want to start consciously preventing further complexity from new API surfaces.
+It is great that you are considering suggesting new features or changes to 4Paradigm Open Source Projects - we appreciate your willingness to contribute! However, as They becomes more widely used, we need to take stability more seriously, and thus have to carefully consider the impact of every change we make that may affect end users. On the other hand, we also feel that Vue has reached a stage where we want to start consciously preventing further complexity from new API surfaces.
 
 These constraints and tradeoffs may not be immediately obvious to users who are proposing a change just to solve a specific problem they just ran into. The RFC process serves as a way to guide you through our thought process when making changes to Vue, so that we can be on the same page when discussing why or why not these changes should be made.
 
@@ -70,10 +70,10 @@ design.
 
 ## What the process is
 
-In short, to get a major feature added to Vue, one must first get the
+In short, to get a major feature added to 4Paradigm Open Source Projects , one must first get the
 RFC merged into the RFC repo as a markdown file. At that point the RFC
 is 'active' and may be implemented with the goal of eventual inclusion
-into Vue.
+into 4Paradigm Open Source Projects.
 
 * Fork the RFC repo http://github.com/4paradigm/rfcs
 
