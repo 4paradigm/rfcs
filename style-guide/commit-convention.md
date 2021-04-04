@@ -13,10 +13,11 @@ Convention for PR/Issue/Commits on GitHub
 ## Commit
 [commit]: #commit
 
-1. commit should follow [conventional commit](https://www.conventionalcommits.org/en/v1.0.0/)
-2. every commit pushed should sign with gpg, and shows verified signature in GitHub page
+1. commit pushed to default branch (merge commit exclude) must follow [conventional commit](https://www.conventionalcommits.org/en/v1.0.0/)
+2. every commit pushed must sign with gpg, and shows verified signature in GitHub page
 3. commiter user: use a valid GitHub username to commit as much as you can
-4. use force push with cautious
+4. force push is prohibited in most case, it should use only for security patch
+5. idealy, we encourage conventional commit in every related branch, also name branch with similar style, e.g `fix/resolve-core-dump`
 
 rule 1 and 2 is enforced.
 
@@ -39,21 +40,22 @@ Follow the issue template defined in each project, which should at least have
 2. PR Template
    + A Pull Request Template like [PR template](https://github.com/4paradigm/fedb/blob/main/.github/pull_request_template.md) should provided.
 3. Conditions to suffice before merge
-    -  reach pre-defined approval number
-    -  CI all pass
-    -  performance and coverage report reach expectations (exclude doc changes)
+   -  reach pre-defined approval number
+   -  CI all pass
+   -  performance and coverage report reach expectations (exclude doc changes)
 
 ## Branch
 [branch]: branch
 
 + use branch name `main` as default branch
-+ default branch is protected, commit should not push to default branch directly, follow the fokr-pr-merge progress
++ default branch is protected, commit should not push to default branch directly, follow the fork-pr-merge progress
 
 ## Tag and Release
 [tag-and-release]: tag-and-release
 
 + use [semantic versioning](https://semver.org)
 + a semantic version tag should start with a `v` prefix, e.g `v1.0.1`
++ semantic version tags (start with `v` prefix) is immutable, force push is prohibited.
 + release asserts should provide DIGESTS{.asc,} file as well, which contains hashes and gpg sign
 
 

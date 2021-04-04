@@ -14,6 +14,7 @@ In summary, imperative languages (C/CPP, Java, Scala, Python), is based on Googl
 
 + indent: 4 space
 + max line length: 120 character
++ name convention:
 
 Concrete style guide can be found:
 
