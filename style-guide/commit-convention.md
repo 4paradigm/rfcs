@@ -8,6 +8,12 @@
 
 Convention for PR/Issue/Commits on GitHub
 
+# Motivation
+
+[motivation]: motivation
+
+To standardize workflows in GitHub. Create a clean and mantainable code space.
+
 # Guide-level explanation
 
 [guide-level-explanation]: #guide-level-explanation
@@ -88,7 +94,8 @@ A conventional commit looks like:
 [optional footer(s)]
 ```
 
-where `<type>` is a enum with
+Different project can propose different types based on project content.
+Convention commit define `<type>` of follow types:
 
 ```txt
   'build',    // Changes that affect the build system or external dependencies (example scopes: gulp, broccoli, npm)
@@ -106,7 +113,7 @@ where `<type>` is a enum with
 
 `scope` can be modified aspect or issue number.
 
-E.g
+E.g.
 
 ```txt
 feat(12): add windows support
