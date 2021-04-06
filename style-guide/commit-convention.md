@@ -1,6 +1,6 @@
 - Feature Name: `commit-convention`
 - Start Date: 2021-3-29
-- RFC PR: #1
+- RFC PR: #1 #2
 
 # Summary
 
@@ -91,17 +91,17 @@ A conventional commit looks like:
 where `<type>` is a enum with
 
 ```txt
-  'build',
-  'chore',
-  'ci',
-  'docs',
-  'feat',
-  'fix',
-  'perf',
-  'refactor',
-  'revert',
-  'style',
-  'test'
+  'build',    // Changes that affect the build system or external dependencies (example scopes: gulp, broccoli, npm)
+  'chore',    // Other changes that don't modify src or test files
+  'ci',       // Changes to our CI configuration files and scripts (example scopes: Travis, Circle, BrowserStac k, SauceLabs)
+  'docs',     // Documentation only changes
+  'feat',     // A new feature
+  'fix',      // A bug fix
+  'perf',     // A code change that improves performance
+  'refactor', // A code change that neither fixes a bug nor adds a feature
+  'revert',   // Reverts a previous commit
+  'style',    // Changes that do not affect the meaning of the code (white-space, formating)
+  'test'      // Adding missing tests or correcting existing tests
 ```
 
 `scope` can be modified aspect or issue number.

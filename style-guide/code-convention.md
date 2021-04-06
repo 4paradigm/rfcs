@@ -1,6 +1,6 @@
 - Feature Name: `code-convention`
 - Start Date: 2021-3-29
-- RFC PR: #1
+- RFC PR: #1 #2
 
 # Coding Convention
 
@@ -14,7 +14,7 @@ In summary, imperative languages (C/CPP, Java, Scala, Python), is based on Googl
 
 - indent: 4 space
 - max line length: 120 character
-- name convention:
+- name convention: we follow Google's naming convention which is 
 
 Concrete style guide can be found:
 
@@ -35,12 +35,13 @@ Data-Serialization language like yaml/json, should follow:
 | language  | linter                                               | linter config                                                                      | formater                                                           | format config                                                                  |
 | --------- | ---------------------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
 | cpp       | [cpplint](https://github.com/cpplint/cpplint)        | default config                                                                     | [clang-format](https://clang.llvm.org/docs/ClangFormat.html)       | [.clang-format](https://github.com/4paradigm/HybridSE/blob/main/.clang-format) |
-| java      | [checkstyle](https://checkstyle.sourceforge.io/)     | [style.xml](https://github.com/4paradigm/HybridSE/blob/main/java/style_checks.xml) | [google-java-format](https://github.com/google/google-java-format) | default with aosp style                                                        |
+| java      | [checkstyle](https://checkstyle.sourceforge.io/)     | [style.xml](https://github.com/4paradigm/HybridSE/blob/main/java/style_checks.xml) | [eclipse.jdt](https://github.com/eclipse/eclipse.jdt.core) | [eclipse-formater.xml](https://github.com/4paradigm/HybridSE/blob/main/java/eclipse-formatter.xml)                                                        |
 | python    | [pylint](https://www.pylint.org/)                    | [pylintrc](https://github.com/4paradigm/HybridSE/blob/main/pylintrc)               | [yapf](https://github.com/google/yapf)                             | default with google style                                                      |
 | yaml/json | -                                                    | -                                                                                  | [prettier](https://prettier.io/)                                   | [prettierrc](https://github.com/4paradigm/HybridSE/blob/main/.prettierrc.yml)  |
 | shell     | [shellcheck](https://github.com/koalaman/shellcheck) | default                                                                            | [shfmt](https://github.com/mvdan/sh)                               | default with indednt = 4                                                       |
 
-**notice: formater do not always solve your lint error, dig hard to the lint rule**
+By default, linters should setup correctly in CICD in order to enforce convention in place like Pull Request. The formaters just give suggestions, there is no restriction which specific formater to use.
+formater do not always solve lint error, dig hard to the lint rule.
 
 ### Cpp
 
