@@ -14,6 +14,8 @@ We are going to use ZetaSQL as our new SQL front-end. The document is trying to 
 - **Design**: How to integrate ZetaSQL into HybridSE
 - **Adoption strategy**: What breaking changes it will bring to FEDB and SparkFE
 
+
+
 # Motivation
 
 HybridSE is LLVM-based SQL engine written in C++. It aims at supporting statndare ANSI SQL and some new SQL traits at the same time. However, as a newly engine, HybridSE only supports a limited set of SQL syntaxs currently and its syntax error message is unfriendly. For example, the syntax error message can't tell the location of wrong expression.
@@ -206,6 +208,10 @@ We create a cmake sampel project integrated zetasql. Check [Discussion link](htt
 https://github.com/aceforeverd/zetasql-sample
 
 Check [Discussion link](https://github.com/4paradigm/HybridSE/discussions/42) for more details.
+
+
+
+# Design
 
 ## Use ZetaSQL as SQL analyzer
 
