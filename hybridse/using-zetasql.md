@@ -1,6 +1,6 @@
 - Start Date:  2021-04-19
 - Target Major Version: (0.2.0)
-- Reference Issues: 
+- Reference Issues:  https://github.com/4paradigm/HybridSE/issues/51
 - Implementation PR:
 
 # Using ZetaSQL as front-end
@@ -36,59 +36,9 @@ ZetaSQL is a SQL Analyzer Framework from Google. We are considering using it as 
 >
 > [ZetaSQL Resolved AST](https://github.com/google/zetasql/blob/master/docs/resolved_ast.md)
 
-## Quick Insight ZetaSQL Analyzer 
+## Quick Insight ZetaSQL Parser 
 
-We do some survey on ZetaSQL. ZetaSQL provides many APIs and services. But we can **only** use its analyzer module, since It can fullfill our requirements. 
-
-### Overview
-
-This section would simplily introduce zetasql analyzer workflow. When analyze a SQL, the zetasql processes the following steps:
-
-```C++
-Zetasql handler sql:
-	--> zetasql::AnalyzeStatement 
-  	--> zetasql::ParseStatement 
-  	--> InternalAnalyzeExpressionFromParserAST
-  		--> ResolveStatement 
-  		--> ValidateResolvedStatement
-```
-
-### AnalyzeStatement
-
-`#include "zetasql/public/analyzer.h"`
-
-```c++
-// Analyze a ZetaSQL statement.
-//
-// This can return errors that point at a location in the input. How this
-// location is reported is given by <options.error_message_mode()>.
-absl::Status AnalyzeStatement(absl::string_view sql,
-                              const AnalyzerOptions& options_in,
-                              Catalog* catalog, TypeFactory* type_factory,
-                              std::unique_ptr<const AnalyzerOutput>* output);
-```
-
-- AnalyzerOptions:  set_enabled_rewrites, enable_rewrite, set_language
-
-- Catalog: can be used to validate SQL
-
-- AnalyzerOutput
-
-  - ```c++
-    // Present for output from AnalyzeStatement.
-    // IdStrings in this resolved AST are allocated in the IdStringPool attached
-    // to this AnalyzerOutput, and copies of those IdStrings will be valid only
-    // if the IdStringPool is still alive.
-    const ResolvedStatement* resolved_statement() const {
-      return statement_.get();
-    }
-    const ResolvedExpr* resolved_expr() const { return expr_.get(); }
-    // ... 
-    ```
-
-### 
-
-
+We do some survey on ZetaSQL. ZetaSQL provides many APIs and services. But we **only** use its parser module, since It can fullfill our requirements. 
 
 ### ParseStatement
 
@@ -108,58 +58,7 @@ absl::Status ParseScript(absl::string_view script_string,
 //...
 ```
 
-We won't use `Parser`'s  APIs directly. They can be called internally from `Analyzer` which we should pay more attention to.
 
-### Resolve statement
-
-`Resolver` provides a set of ResolveXXXX APIs.
-
-ResolvedNode examples:
-
-```
-- ResolveQueryStatement
-  - ResolveWithClauseIfPresent
-    - ResolveWithEntry
-  - ResolveQueryAfterWith
-    - ResolveSelect
-      - ResolveFromClauseAndCreateScan
-      - ResolveWhereClauseAndCreateScan
-      - ResolveSelectListExprsFirstPass
-      - ResolveSelectListExprsSecondPass
-        - ResolveSelectColumnSecondPass
-      - ResolveAdditionalExprsSecondPass
-      - ResolveGroupByExprs
-      - ResolveHavingExpr
-    - ResolveOrderByAfterSetOperations
-    - ResolveLimitOffsetScan
-- ResolveCreateIndexStatement
-- ResolveCreateTableStatement
-- ResolveCreateViewStatement
-```
-
-### ValidateResolvedStatement
-
-### Rewriters
-
-```c++
-const std::vector<const Rewriter*>& AllRewriters() {
-  static const auto* const kRewriters = new std::vector<const Rewriter*>{
-      GetAnonymizationRewriter(), GetArrayFunctionsRewriter(),
-      GetFlattenRewriter(),       GetMapFunctionRewriter(),
-      GetPivotRewriter(),         GetUnpivotRewriter(),
-  };
-  return *kRewriters;
-}
-```
-
-Zetasql currently support following rewriters:
-
-- AnonymizationRewriter
-- ArrayFunctionsRewriter
-- FlattenRewriter
-- MapFunctionRewriter
-- PivotRewriter
-- UnpivotRewriter
 
 ## Build & test
 
@@ -211,15 +110,11 @@ Check [Discussion link](https://github.com/4paradigm/HybridSE/discussions/42) fo
 
 
 
-# Design
+# Design [WIP]
 
 ## Use ZetaSQL as SQL analyzer
 
 ZetaSQL supports standare ANSI SQL. Can fulfill our requirements.
-
-1. Use `Analyzer` APIs to generate `ResolvedAST` nodes. 
-2. Convert `ResolvedExpression` (of zetasql) to `ExprNode` (of hybridse).
-3. Convert `ResolvedStatement` to `LogicalPlan` (of hybridse).
 
 **Pros**:
 
@@ -227,13 +122,48 @@ We keep `ExprNode`  of hybridse. This will introduce least changes into codegen 
 
 **Cons**:
 
-We hava `ExprNode` and `ResolvedExpressionNode` in hybridse at the same time. This is redundant. And we have to implement more `ExprNode` node to overlap all SQL expression syntax.
+We hava `ExprNode` and `ResolvedExpr` in hybridse at the same time. This is redundant. And we have to implement more `ExprNode` node to overlap all SQL expression syntax.
+
+1. Use `Analyzer` APIs to generate `ResolvedAST` nodes. 
+2. Convert `ResolvedExpr` (of zetasql) to `ExprNode` (of hybridse).
+3. Convert `ResolvedStatement` to `LogicalPlan` (of hybridse).
 
 
 
-## Do not use ZetaSQL validation
+### Convert `ASTExpression` to `ExprNode`
 
-ZetaSQL can validate SQL statement when we register catalog information to zetasql. We won't use it in this vesion. Maybe will work on it in the future.
+| ASTExpression                                                | `ExprNode`       | New traits |
+| ------------------------------------------------------------ | ---------------- | ---------- |
+| ResolvedParameter                                            |                  |            |
+| `ASTStringLiteral` <br/>ASTFloatLiteral <br/>ASTNullLiteral <br/>ASTNumericLiteral <br/>ASTIntLiteral <br/>ASTBooleanLiteral | ConstNode        |            |
+| ResolvedFunctionCallBase                                     |                  |            |
+| ASTCastExpression                                            | CastExprNode     |            |
+| ASTCaseValueExpression                                       | CaseWhenExprNode |            |
+| ASTFunctionCall                                              | CallExprNode     |            |
+| ASTBinaryExpression <br/>ASTAndExpr <br/>                    | BinaryExpr       |            |
+| ASTUnaryExpression                                           | UnaryExpr        |            |
+| ASTIdentifier                                                | ExprIdNode       |            |
+| ASTPathExpression                                            | ColumnRefNode    |            |
+| ASTBetweenExpression                                         | BetweenExpr      |            |
+| ASTOrderBy                                                   | OrderByNode      |            |
+| ASTTablePathExpression                                       | TableRefNode     |            |
+|                                                              |                  |            |
+|                                                              |                  |            |
+
+ #### Convert `ParserOutput` to LogicalPlan  [WIP]
+
+| ParserOutput / ASTNode                                       | SQLNode         | LogicalPlan                                                  |
+| ------------------------------------------------------------ | --------------- | ------------------------------------------------------------ |
+| ASTSelect  <br/>ASTSelectList <br/>ASTSelectColumn <br/>ASTFromClause <br/>ASTWhereClause | SelectQueryNode | `bool Planner::CreateSelectQueryPlan(const ASTSelect *root,                                     PlanNode **plan_tree, Status &status) ` |
+| ASTInsertStatement                                           | InsertStmt      | `bool Planner::CreateInsertPlan(const node::ASTInsertStatement*,  *root,                                node::PlanNode **output,                                Status &status) {  // NOLINT (runtime/references)` |
+| ASTCreateStatement                                           | CreateStmt      |                                                              |
+| ASTFunctionDeclaration                                       | FnNodeFnDef     |                                                              |
+
+
+
+## Do not use ZetaSQL validation and rewrite
+
+ZetaSQL can validate SQL statement when we register catalog information to zetasql. We won't use it in this vesion untill we refactor our `Catalog`.
 
 
 
