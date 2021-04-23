@@ -57,3 +57,5 @@ HTTP Method: POST
 ```
 
 ### Server design
+
+We use [brpc HTTP Service](https://github.com/apache/incubator-brpc/blob/master/docs/en/http_service.md) framework to tackle the http request. So what need to do is forwarding the reques to FEDB server with fedb sdk in brpc http service implementation.
