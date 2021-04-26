@@ -26,7 +26,7 @@ ZetaSQL is a SQL Analyzer Framework from Google. We are considering using it as 
 
 
 
-# Design
+# Feasibility
 
 > ZetaSQL defines a language (grammar, types, data model, and semantics) as well as a parser and analyzer. It is not itself a database or query engine. Instead it is intended to be used by multiple engines wanting to provide consistent behavior for all semantic analysis, name resolution, type checking, implicit casting, etc. 
 >
@@ -52,7 +52,95 @@ We won't use zetasql analyer in this vesion for the following reasons:
   - `ResolvedExpression` do not have `CastNode`, `CaseWhenNode`
 - ZetaSQL can validate SQL statement when we register catalog information to zetasql.  It would be better if we use analyzer after refactor hyrbidse `Catalog`.
 
-## Use ZetaSQL parser
+## Build and Test zetasql parser
+
+In order to build and test in different sysmtem,  we can simplify build and test packages.  Check [Discussion link](https://github.com/4paradigm/HybridSE/discussions/42) for more details.
+
+### Linux
+
+- Build
+
+```
+bazel build -- //... -zetasql/jdk/... -zetasql/local_service/... -java/... -javatests/...
+```
+
+- Test
+
+```
+bazel test --test_summary=detailed  //zetasql/parser/...
+```
+
+**Linux system compatibility can be shown as below table:**
+
+| os            | gcc    | glibc | build | test |      |
+| ------------- | ------ | ----- | ----- | ---- | ---- |
+| centos:7      | 7.3.1  | 2.17  | pass  | pass |      |
+| centos:7      | 8.3.1  | 2.17  | pass  | pass |      |
+| centos:7      | 9.3.1  | 2.17  | pass  | pass |      |
+| centos:8      | 8.3.1  | 2.28  | pass  | pass |      |
+| ubuntu:bionic | 8.4.0  | 2.27  | pass  | pass |      |
+| ubuntu:focal  | 9.3.0  | 2.31  | pass  | pass |      |
+| Debian:buster | 8.31   | 2.28  | pass  | pass |      |
+| ArchLinux     | 10.2.0 | 2.33  | pass  | pass |      |
+
+Linux building status: https://github.com/aceforeverd/zetasql/actions/runs/750588862
+
+### Mac
+
+```
+bazel build --features=-supports_dynamic_linker -- //... -zetasql/jdk/... -zetasql/local_service/... -java/... -javatests/...
+```
+
+- Test
+
+```
+bazel test --test_summary=detailed --features=-supports_dynamic_linker //zetasql/parser/...
+```
+
+**Mac system compatibility can be shown as below table:**
+
+| os        | Clang                                           | build | test |      |
+| --------- | ----------------------------------------------- | ----- | ---- | ---- |
+| Mac:10.15 | Apple clang version 12.0.0 (clang-1200.0.32.21) | pass  | Pass |      |
+
+Mac building status: https://github.com/jingchen2222/zetasql/runs/2348401484?check_suite_focus=true
+
+### Problems
+
+- absl
+
+```
+executing command external/local_config_cc/cc_wrapper.sh -lc++ -fobjc-link-runtime -Wl,-S -shared -o bazel-out/darwin-fastbuild/bin/external/com_google_absl/absl/synchronization/libsynchronization.so ... (remaining 13 argument(s) skipped)
+```
+
+[abseil/abseil-cpp#848](https://github.com/abseil/abseil-cpp/issues/848)
+[abseil/abseil-cpp#848 (comment)](https://github.com/abseil/abseil-cpp/issues/848#issuecomment-761091854)
+Workaround by using `--features=-supports_dynamic_linker`
+
+- grpc
+
+```
+external/upb/upb/upb.h:39:3: error: '_Bool' is a C99 extension [-Werror,-Wc99-extensions]
+```
+
+See workaround here [jingchen2222/zetasql@`cf05607`#diff-a70ff1813d701c83652081d186aba748e180da906b69ec3b86e8d6383530d5e2](https://github.com/jingchen2222/zetasql/commit/cf05607f126a2d28ff25778b345ea1406650e94c#diff-a70ff1813d701c83652081d186aba748e180da906b69ec3b86e8d6383530d5e2)
+
+- bazel test //zetasql/parser/...
+
+```
+FAIL: //zetasql/parser:parser_create_table_test (see /private/var/tmp/_bazel_runner/407c56d6e0400a81316224b3e40aaea4/execroot/com_google_zetasql/bazel-out/darwin-fastbuild/testlogs/zetasql/parser/parser_create_table_test/test.log)
+FAIL: //zetasql/parser:parser_standalone_type_test (see /private/var/tmp/_bazel_runner/407c56d6e0400a81316224b3e40aaea4/execroot/com_google_zetasql/bazel-out/darwin-fastbuild/testlogs/zetasql/parser/parser_standalone_type_test/test.log)
+```
+
+See workaround here:
+https://github.com/jingchen2222/zetasql/pull/3/files#diff-7ebc691e7f3f59ec4bc1719cb502fda627d8dcb1c4bbd4e2bc62370bcacaf6f1
+file: zetasql/parser/builddefs.bzl
+
+# Design
+
+## Integrate ZetaSQL parser
+
+
 
 ZetaSQL supports standare ANSI SQL.  We are going to integrate zetasql's parser by following steps:
 
@@ -88,7 +176,7 @@ We hava `ExprNode` and `ASTExpression` in hybridse at the same time. This is red
 |                                                              |                  |            |
 |                                                              |                  |            |
 
- #### Convert `ParserOutput` to LogicalPlan  [WIP]
+### Convert `ParserOutput` to LogicalPlan  [WIP]
 
 | ParserOutput / ASTNode                                       | SQLNode         | LogicalPlan                                                  |
 | ------------------------------------------------------------ | --------------- | ------------------------------------------------------------ |
@@ -99,9 +187,9 @@ We hava `ExprNode` and `ASTExpression` in hybridse at the same time. This is red
 
 
 
-## Add new syntax into ZetaSQL (WPI)
+## Implement new syntax
 
-ZetaSQL also use bison and flex to parse SQL. It will easy for us to imigrate our New SQL syntax, e.g., `LAST JOIN`, `WINDOW ROWS_RANGE`.
+ZetaSQL uses bison and flex to parse SQL. That make it easy for us to implement our New SQL syntax, e.g., `LAST JOIN`, `WINDOW ROWS_RANGE`.
 
 ### Last Join
 
@@ -186,36 +274,96 @@ frame_unit:
     ;
 ```
 
-
-
 ### UDF & UDAF
 
 ```SQL
-function_call_expression_with_args_prefix:
-    function_call_expression_base function_call_argument
+create_function_statement:
+    "CREATE" opt_or_replace opt_create_scope opt_aggregate
+        "FUNCTION" opt_if_not_exists function_declaration opt_function_returns
+        opt_sql_security_clause opt_determinism_level opt_language
+        as_sql_function_body_or_string opt_options_list
       {
-        $$ = WithExtraChildren($1, {$2});
+        //...
       }
-    // The first argument may be a "*" instead of an expression. This is valid
-    // for COUNT(*), which has no other arguments
-    // and ANON_COUNT(*), which has multiple other arguments.
-    // The analyzer must validate the "*" is not used with other functions.
-    | function_call_expression_base "*"
+    | "CREATE" opt_or_replace opt_create_scope opt_aggregate
+        "FUNCTION" opt_if_not_exists function_declaration opt_function_returns
+        opt_sql_security_clause opt_determinism_level opt_language "OPTIONS" options_list
+        opt_as_sql_function_body_or_string
       {
-        auto* star = MAKE_NODE(ASTStar, @2);
-        star->set_image("*");
-        $$ = WithExtraChildren($1, {star});
+        //...
       }
-    | function_call_expression_with_args_prefix "," function_call_argument
+    | "CREATE" opt_or_replace opt_create_scope opt_aggregate
+        "FUNCTION" opt_if_not_exists function_declaration opt_function_returns
+        opt_sql_security_clause opt_determinism_level opt_language
       {
-        $$ = WithExtraChildren($1, {$3});
+       //...
+      }
+    ;
+    
+sql_function_body:
+    "(" expression ")"
+      {
+        $$ = MAKE_NODE(ASTSqlFunctionBody, @$, {$2});
       }
     ;
 ```
 
-UDF and UDAF are supported as `AST_FUNCTION_CALL` node in `Zetasql` . We don't need to modify `yacc` file. It would be easy to use zetasql implement hybridse's `UDF` and `UDAF`.
+```SQL
+CREATE TEMP FUNCTION AddFourAndDivide(x INT64, y INT64)
+RETURNS DOUBLE
+AS ((x + 4) / y);
+WITH numbers AS
+  (SELECT 1 as val UNION ALL
+   SELECT 3 as val UNION ALL
+   SELECT 4 as val UNION ALL
+   SELECT 5 as val)
+SELECT val, AddFourAndDivide(val, 2) AS result
+FROM numbers;
 
++-----+--------+
+| val | result |
++-----+--------+
+| 1   | 2.5    |
+| 3   | 3.5    |
+| 4   | 4      |
+| 5   | 4.5    |
++-----+--------+
+```
 
+Zetasql's `sql_function_body` is a expression, which isn't compatible with hybridse's UDF. 
+
+Zetasql has script statements. But these script statements can't be used in function body.
+
+```SQL
+unterminated_script_statement:
+    if_statement
+    | begin_end_block
+    | variable_declaration
+    | while_statement
+    | loop_statement
+    | repeat_statement
+    | for_in_statement
+    | break_statement
+    | continue_statement
+    | return_statement
+    | raise_statement
+    ;
+
+terminated_statement:
+    unterminated_statement ";"
+      {
+        $$ = $1;
+      }
+    ;
+```
+
+We are planning to support using script statements in function body in the future. 
+
+**Conclusion:**
+
+We will implement simple user defined function with expression in its function body.
+
+We will support script statements for udf in the future.
 
 ### Create SQL 
 
@@ -330,7 +478,7 @@ table_constraint_definition:
 
 
 
-## Design Error Tips
+## Error Tips
 
 ### Syntax Error Tips
 
@@ -419,8 +567,6 @@ drop table;
 ==
 ```
 
-
-
 #### All tips must contain help links
 
 ```SQL
@@ -434,99 +580,11 @@ If the tips above don't help, you can get more help from [slack channel](https:/
 
 If the tips above don't help, you can get more help from [slack channel](https://join.slack.com/t/hybridsql-ws/shared_invite/zt-ozu3llie-K~hn9Ss1GZcFW2~K_L5sMg)
 
-
-
 ### Plan Error Tips
 
 We will discuss plan error tips in the furture works.
 
-## Build Summary
-
-In order to build and test in different sysmtem,  we can simplify build and test packages.  Check [Discussion link](https://github.com/4paradigm/HybridSE/discussions/42) for more details.
-
-### Build and Test zetasql parser
-
-#### Linux
-
-- Build
-
-```
-bazel build -- //... -zetasql/jdk/... -zetasql/local_service/... -java/... -javatests/...
-```
-
-- Test
-
-```
-bazel test --test_summary=detailed  //zetasql/parser/...
-```
-
-**Linux system compatibility can be shown as below table:**
-
-| os            | gcc    | glibc | build | test |      |
-| ------------- | ------ | ----- | ----- | ---- | ---- |
-| centos:7      | 7.3.1  | 2.17  | pass  | pass |      |
-| centos:7      | 8.3.1  | 2.17  | pass  | pass |      |
-| centos:7      | 9.3.1  | 2.17  | pass  | pass |      |
-| centos:8      | 8.3.1  | 2.28  | pass  | pass |      |
-| ubuntu:bionic | 8.4.0  | 2.27  | pass  | pass |      |
-| ubuntu:focal  | 9.3.0  | 2.31  | pass  | pass |      |
-| Debian:buster | 8.31   | 2.28  | pass  | pass |      |
-| ArchLinux     | 10.2.0 | 2.33  | pass  | pass |      |
-
-Linux building status: https://github.com/aceforeverd/zetasql/actions/runs/750588862
-
-#### Mac
-
-```
-bazel build --features=-supports_dynamic_linker -- //... -zetasql/jdk/... -zetasql/local_service/... -java/... -javatests/...
-```
-
-- Test
-
-```
-bazel test --test_summary=detailed --features=-supports_dynamic_linker //zetasql/parser/...
-```
-
-**Mac system compatibility can be shown as below table:**
-
-| os        | Clang                                           | build | test |      |
-| --------- | ----------------------------------------------- | ----- | ---- | ---- |
-| Mac:10.15 | Apple clang version 12.0.0 (clang-1200.0.32.21) | pass  | Pass |      |
-
-Mac building status: https://github.com/jingchen2222/zetasql/runs/2348401484?check_suite_focus=true
-
-### Build and Test Problems
-
-- absl
-
-```
-executing command external/local_config_cc/cc_wrapper.sh -lc++ -fobjc-link-runtime -Wl,-S -shared -o bazel-out/darwin-fastbuild/bin/external/com_google_absl/absl/synchronization/libsynchronization.so ... (remaining 13 argument(s) skipped)
-```
-
-[abseil/abseil-cpp#848](https://github.com/abseil/abseil-cpp/issues/848)
-[abseil/abseil-cpp#848 (comment)](https://github.com/abseil/abseil-cpp/issues/848#issuecomment-761091854)
-Workaround by using `--features=-supports_dynamic_linker`
-
-- grpc
-
-```
-external/upb/upb/upb.h:39:3: error: '_Bool' is a C99 extension [-Werror,-Wc99-extensions]
-```
-
-See workaround here [jingchen2222/zetasql@`cf05607`#diff-a70ff1813d701c83652081d186aba748e180da906b69ec3b86e8d6383530d5e2](https://github.com/jingchen2222/zetasql/commit/cf05607f126a2d28ff25778b345ea1406650e94c#diff-a70ff1813d701c83652081d186aba748e180da906b69ec3b86e8d6383530d5e2)
-
-- bazel test //zetasql/parser/...
-
-```
-FAIL: //zetasql/parser:parser_create_table_test (see /private/var/tmp/_bazel_runner/407c56d6e0400a81316224b3e40aaea4/execroot/com_google_zetasql/bazel-out/darwin-fastbuild/testlogs/zetasql/parser/parser_create_table_test/test.log)
-FAIL: //zetasql/parser:parser_standalone_type_test (see /private/var/tmp/_bazel_runner/407c56d6e0400a81316224b3e40aaea4/execroot/com_google_zetasql/bazel-out/darwin-fastbuild/testlogs/zetasql/parser/parser_standalone_type_test/test.log)
-```
-
-See workaround here:
-https://github.com/jingchen2222/zetasql/pull/3/files#diff-7ebc691e7f3f59ec4bc1719cb502fda627d8dcb1c4bbd4e2bc62370bcacaf6f1
-file: zetasql/parser/builddefs.bzl
-
-
+## Thirdparty dependencies
 
 ### Use Zetasql as cmake dependency
 
