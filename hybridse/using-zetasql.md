@@ -16,13 +16,13 @@ We are going to use ZetaSQL as our new SQL front-end. The document is trying to 
 
 # Motivation
 
-HybridSE is LLVM-based SQL engine written in C++. It aims at supporting statndare ANSI SQL and some new SQL traits at the same time. However, as a newly engine, HybridSE only supports a limited set of SQL syntaxs currently and its syntax error message is unfriendly. For example, the syntax error message can't tell the location of wrong expression.
+HybridSE is LLVM-based SQL engine written in C++. It aims at supporting standard ANSI SQL and some new SQL traits at the same time. However, as a newly engine, HybridSE only supports a limited set of SQL syntaxs currently and its syntax error message is unfriendly. For example, the syntax error message can't tell the location of wrong expression.
 
 ZetaSQL is a SQL Analyzer Framework from Google. We are considering using it as HybridSE's SQL parser and analyzer for following reasons:
 
 - ZetaSQL has been used for BigQuery, Spanner and DataflowSQL by Google
 - ZetaSQL is a C++ SQL parser, which can be easily integrate into HybridSE
-- ZetaSQL supports standare ANSI SQL and provides clearly error messge. 
+- ZetaSQL supports standard ANSI SQL and provides clearly error messge. 
 
 
 
@@ -136,17 +136,43 @@ See workaround here:
 https://github.com/jingchen2222/zetasql/pull/3/files#diff-7ebc691e7f3f59ec4bc1719cb502fda627d8dcb1c4bbd4e2bc62370bcacaf6f1
 file: zetasql/parser/builddefs.bzl
 
-# 
+### Use Zetasql as cmake dependency
+
+Although zetasql is a bazel-based project and have its dependencies in the mean time, We'll use zetasql in a cmake proeject as following steps (Checkout [zetasql-sample](https://github.com/aceforeverd/zetasql-sample) to see the details.): 
+
+- Prepare headers
+  -  find every header file and install to a include directory
+    after telling cmake how to find zetasql's lib and include headers, it should link.
+- compiled shared library (.so) or static library (.a)
+  - find and install compiled .so/.a into same directory (without directory hierarchy)
+  - for static library, using tools like `ar` or `libtool` to merge into single static archive
+
+**Exceptions**
+bazel's `cc_library` should produce both .a and .so by default. But a lib called `template_sql_tvf` do not follow this, it is built with `likestatic=True` in bazel's `cc_library`. Look like a implementation limit.
+
+**Transitive dependence**
+
+zetasql's thirdparty dependencies, should merge into HybridSQL's standard dependency list. Some may have breaking upgrade:
+
+1. protobuf: form 2.x.x -> 3.x.x
+
+**Compiler and Options**
+
+zetasql is built with c++1z(c++17), since c++17 is stabilized in gcc 8 (not sure which specific version but 8.3 works fine), we should upgrade to gcc 8 or later. And use `-std=c++1z` as well because zetasql's include file use c++17 features.
+
+checkout this for more: https://stackoverflow.com/questions/46746878/is-it-safe-to-link-c17-c14-and-c11-objects
+
+# Design
 
 ## Integrate ZetaSQL parser
 
-
-
-ZetaSQL supports standare ANSI SQL.  We are going to integrate zetasql's parser by following steps:
+ZetaSQL supports standard ANSI SQL.  We are going to integrate zetasql's parser by following steps:
 
 1. Use `ParseStatement` APIs to generate `ASTStatement` . 
 2. Transform `ASTStatement` into `LogicalPlan` .
 3. Convert `ASTExpression`  to `ExprNode` 
+
+![Figure2-use-zetasql-parser](./images/image-hybridse-new-parser.png)
 
 **Pros**:
 
@@ -326,7 +352,7 @@ table_constraint_definition:
     index(key=(col1, col2), ts=std_ts, ttl= ..., ttl_tyle= ...)
     ````
 
-  - we are considering to support TIME Index follow standare SQL syntax by using `opt_options_list`. i.e:
+  - we are considering to support TIME Index follow standard SQL syntax by using `opt_options_list`. i.e:
 
     - ```SQL
       CREATE TABLE t1 (
@@ -381,7 +407,7 @@ table_constraint_definition:
       ) OPTIONS REPLICANUM = 3, PARTITIONNUM = 8, LEADER = endpoint1, LEADER = endpoint1, FOLLOWER = endpoint2, FOLLOWER = endpoint3, FOLLOWER = endpoint3;
       ```
 
-  - **We sugguest design distribution options in standare SQL style.** 
+  - **We sugguest design distribution options in standard SQL style.** 
 
   - **We can but do not recommand implement  fedb's `table_options` in zetasql.**
 
@@ -586,43 +612,6 @@ If the tips above don't help, you can get more help from [slack channel](https:/
 
 We will discuss plan error tips in the furture works.
 
-## Thirdparty dependencies
-
-### Use Zetasql as cmake dependency
-
-Although zetasql is a bazel-based project and have its dependencies in the mean time, We'll use zetasql in a cmake proeject as following steps (Checkout [zetasql-sample](https://github.com/aceforeverd/zetasql-sample) to see the details.): 
-
-- Prepare headers
-  -  find every header file and install to a include directory
-    after telling cmake how to find zetasql's lib and include headers, it should link.
-- compiled shared library (.so) or static library (.a)
-  - find and install compiled .so/.a into same directory (without directory hierarchy)
-  - for static library, using tools like `ar` or `libtool` to merge into single static archive
-
-**Exceptions**
-bazel's `cc_library` should produce both .a and .so by default. But a lib called `template_sql_tvf` do not follow this, it is built with `likestatic=True` in bazel's `cc_library`. Look like a implementation limit.
-
-**Transitive dependence**
-
-zetasql's thirdparty dependencies, should merge into HybridSQL's standard dependency list. Some may have breaking upgrade:
-
-1. protobuf: form 2.x.x -> 3.x.x
-
-**Compiler and Options**
-
-zetasql is built with c++1z(c++17), since c++17 is stabilized in gcc 8 (not sure which specific version but 8.3 works fine), we should upgrade to gcc 8 or later. And use `-std=c++1z` as well because zetasql's include file use c++17 features.
-
-checkout this for more: https://stackoverflow.com/questions/46746878/is-it-safe-to-link-c17-c14-and-c11-objects
-
-### Update thirdpaty
-
-- Maintain 4paradigm/zetasql 
-- Update thirdparty libraries and development dockers
-  - adding zetasql and its dependencies into thirdparty
-- Update thirdparty install guide
-
-
-
 # Adoption strategy
 
 If we implement this proposal, it might bring some changes of APIs which is used by SparkFE and FEDB.
@@ -630,6 +619,6 @@ If we implement this proposal, it might bring some changes of APIs which is used
 We will try to avoid introducing many changes, but there are still some changes:
 
 - In order to use zetasql, we might have to upgrade the OS and dependencies libraries. For example, `protobuf` upgrade from 2.x.x to 3.x.x. 
-- We will use standare SQL which might have conflict with hybridse original SQL syntax. For Instance,  `CREATE TABLE` Statement, `Index` and `Partition` options.
+- We will use standarddare SQL which might have conflict with hybridse original SQL syntax. For Instance,  `CREATE TABLE` Statement, `Index` and `Partition` options.
 
 
