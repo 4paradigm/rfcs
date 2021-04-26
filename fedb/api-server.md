@@ -7,23 +7,21 @@
 
 # Summary
 
-HTTP interface is one of the most friendly interface and many developer like using http interface to develop their program. HTTP API also help us to show demo simply. So we want to support uing http api to access FEDB.
+HTTP interface is one of the most friendly interface and many developers like using http interface to develop their program. REST API also help us to show demo simply. So we want to support uing http api to access FEDB.
 
 # Detailed design
 
 
 ## Interface design
-HTTP URL: http://ip:port/sql
+HTTP URL: http://ip:port/sql/{method_name}?db={db_name}&table={table_name}
 
 HTTP Method: POST
 
 ### Put
-request
+reqeust url: http://ip:port/sql/put?db={db_name}&table={table_name}  
+request body: 
 ```
 {
-    "method": "put",
-    "db": "db_name",
-    "table": "table_name",
     "value": {
         "field1": "value1",
         "field2": 111,
@@ -41,12 +39,10 @@ response
 ```
 
 ### Execute procedure 
-reqeust
+reqeust url: http://ip:port/sql/execute_procedure?db={db_name}&table={table_name}  
+request body: 
 ```
 {
-    "method": "execute_procedure",
-    "db": "db_name",
-    "table": "table_name",
     "value": {
         "name": "procedure_name",
         "input": {
@@ -66,12 +62,11 @@ response
 }
 ```
 ### Execute SQL
-request
+reqeust url: http://ip:port/sql/execute_sql?db={db_name}&table={table_name}  
+request body: 
 
 ```
 {
-    "method": "execute_sql",
-    "db": "db_name",
     "data": {
         "sql": "select * from t1"
         "input": {
@@ -103,7 +98,9 @@ We use [brpc HTTP Service](https://github.com/apache/incubator-brpc/blob/master/
     message HttpResponse { };
 
     service APIService {
-        rpc ForwardSQL(HttpRequest) returns (HttpResponse);
+        rpc Put(HttpRequest) returns (HttpResponse);
+        rpc ExeSQL(HttpRequest) returns (HttpResponse);
+        rpc ExeProcedure(HttpRequest) returns (HttpResponse);
     }
     ```
 2. Implement the service  
@@ -114,7 +111,21 @@ We use [brpc HTTP Service](https://github.com/apache/incubator-brpc/blob/master/
             // init the sdk
             ...
         }
-        virtual void ForwardSQL(google::protobuf::RpcController* controller,
+        virtual void Put(google::protobuf::RpcController* controller,
+                                const HttpRequest* request,
+                                HttpResponse* response,
+                                google::protobuf::Closure* done) {
+            // parse request attachment
+            ...
+        }
+        virtual void ExeSQL(google::protobuf::RpcController* controller,
+                                const HttpRequest* request,
+                                HttpResponse* response,
+                                google::protobuf::Closure* done) {
+            // parse request attachment
+            ...
+        }
+        virtual void ExeProcedure(google::protobuf::RpcController* controller,
                                 const HttpRequest* request,
                                 HttpResponse* response,
                                 google::protobuf::Closure* done) {
@@ -123,17 +134,16 @@ We use [brpc HTTP Service](https://github.com/apache/incubator-brpc/blob/master/
         }
     };
     ```
-3. Dispatch and forward request
+3. Add mapping
     
     ```
-    if (method == "put") {
-        // sdk put
-    } else if (method == "execute_procedure") {
-        // sdk execute procedure
-    } else if (method == "execute_sql") {
-        // sdk execute sql
-    } eles {
-        LOG(ERROR) << "unsupport method";
+    if (server.AddService(&api_svc,
+                      brpc::SERVER_DOESNT_OWN_SERVICE,
+                      "/sql/put               => Put,"
+                      "/sql/execute_sql       => ExeSQL,"
+                      "/sql/execute_procedure => ExeProcedure") != 0) {
+        LOG(ERROR) << "Fail to add api service";
+        return -1;
     }
     ```
 
