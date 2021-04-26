@@ -136,7 +136,7 @@ See workaround here:
 https://github.com/jingchen2222/zetasql/pull/3/files#diff-7ebc691e7f3f59ec4bc1719cb502fda627d8dcb1c4bbd4e2bc62370bcacaf6f1
 file: zetasql/parser/builddefs.bzl
 
-# Design
+# 
 
 ## Integrate ZetaSQL parser
 
@@ -274,97 +274,6 @@ frame_unit:
     ;
 ```
 
-### UDF & UDAF
-
-```SQL
-create_function_statement:
-    "CREATE" opt_or_replace opt_create_scope opt_aggregate
-        "FUNCTION" opt_if_not_exists function_declaration opt_function_returns
-        opt_sql_security_clause opt_determinism_level opt_language
-        as_sql_function_body_or_string opt_options_list
-      {
-        //...
-      }
-    | "CREATE" opt_or_replace opt_create_scope opt_aggregate
-        "FUNCTION" opt_if_not_exists function_declaration opt_function_returns
-        opt_sql_security_clause opt_determinism_level opt_language "OPTIONS" options_list
-        opt_as_sql_function_body_or_string
-      {
-        //...
-      }
-    | "CREATE" opt_or_replace opt_create_scope opt_aggregate
-        "FUNCTION" opt_if_not_exists function_declaration opt_function_returns
-        opt_sql_security_clause opt_determinism_level opt_language
-      {
-       //...
-      }
-    ;
-    
-sql_function_body:
-    "(" expression ")"
-      {
-        $$ = MAKE_NODE(ASTSqlFunctionBody, @$, {$2});
-      }
-    ;
-```
-
-```SQL
-CREATE TEMP FUNCTION AddFourAndDivide(x INT64, y INT64)
-RETURNS DOUBLE
-AS ((x + 4) / y);
-WITH numbers AS
-  (SELECT 1 as val UNION ALL
-   SELECT 3 as val UNION ALL
-   SELECT 4 as val UNION ALL
-   SELECT 5 as val)
-SELECT val, AddFourAndDivide(val, 2) AS result
-FROM numbers;
-
-+-----+--------+
-| val | result |
-+-----+--------+
-| 1   | 2.5    |
-| 3   | 3.5    |
-| 4   | 4      |
-| 5   | 4.5    |
-+-----+--------+
-```
-
-Zetasql's `sql_function_body` is a expression, which isn't compatible with hybridse's UDF. 
-
-Zetasql has script statements. But these script statements can't be used in function body.
-
-```SQL
-unterminated_script_statement:
-    if_statement
-    | begin_end_block
-    | variable_declaration
-    | while_statement
-    | loop_statement
-    | repeat_statement
-    | for_in_statement
-    | break_statement
-    | continue_statement
-    | return_statement
-    | raise_statement
-    ;
-
-terminated_statement:
-    unterminated_statement ";"
-      {
-        $$ = $1;
-      }
-    ;
-```
-
-We are planning to support using script statements in function body in the future. 
-
-**Conclusion:**
-
-We will implement simple user defined function with expression in its function body.
-
-We will support script statements for udf in the future.
-
 ### Create SQL 
 
 ```SQL
@@ -475,6 +384,99 @@ table_constraint_definition:
   - **We sugguest design distribution options in standare SQL style.** 
 
   - **We can but do not recommand implement  fedb's `table_options` in zetasql.**
+
+
+
+### UDF & UDAF
+
+```SQL
+create_function_statement:
+    "CREATE" opt_or_replace opt_create_scope opt_aggregate
+        "FUNCTION" opt_if_not_exists function_declaration opt_function_returns
+        opt_sql_security_clause opt_determinism_level opt_language
+        as_sql_function_body_or_string opt_options_list
+      {
+        //...
+      }
+    | "CREATE" opt_or_replace opt_create_scope opt_aggregate
+        "FUNCTION" opt_if_not_exists function_declaration opt_function_returns
+        opt_sql_security_clause opt_determinism_level opt_language "OPTIONS" options_list
+        opt_as_sql_function_body_or_string
+      {
+        //...
+      }
+    | "CREATE" opt_or_replace opt_create_scope opt_aggregate
+        "FUNCTION" opt_if_not_exists function_declaration opt_function_returns
+        opt_sql_security_clause opt_determinism_level opt_language
+      {
+       //...
+      }
+    ;
+    
+sql_function_body:
+    "(" expression ")"
+      {
+        $$ = MAKE_NODE(ASTSqlFunctionBody, @$, {$2});
+      }
+    ;
+```
+
+```SQL
+CREATE TEMP FUNCTION AddFourAndDivide(x INT64, y INT64)
+RETURNS DOUBLE
+AS ((x + 4) / y);
+WITH numbers AS
+  (SELECT 1 as val UNION ALL
+   SELECT 3 as val UNION ALL
+   SELECT 4 as val UNION ALL
+   SELECT 5 as val)
+SELECT val, AddFourAndDivide(val, 2) AS result
+FROM numbers;
+
++-----+--------+
+| val | result |
++-----+--------+
+| 1   | 2.5    |
+| 3   | 3.5    |
+| 4   | 4      |
+| 5   | 4.5    |
++-----+--------+
+```
+
+Zetasql's `sql_function_body` is a expression, which isn't compatible with hybridse's UDF. 
+
+Zetasql has script statements. But these script statements can't be used in function body.
+
+```SQL
+unterminated_script_statement:
+    if_statement
+    | begin_end_block
+    | variable_declaration
+    | while_statement
+    | loop_statement
+    | repeat_statement
+    | for_in_statement
+    | break_statement
+    | continue_statement
+    | return_statement
+    | raise_statement
+    ;
+
+terminated_statement:
+    unterminated_statement ";"
+      {
+        $$ = $1;
+      }
+    ;
+```
+
+We are planning to support using script statements in function body in the future. 
+
+**Conclusion:**
+
+We will implement simple user defined function with expression in its function body.
+
+We will support script statements for udf in the future.
 
 
 
