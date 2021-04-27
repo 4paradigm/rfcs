@@ -117,14 +117,6 @@ executing command external/local_config_cc/cc_wrapper.sh -lc++ -fobjc-link-runti
 [abseil/abseil-cpp#848 (comment)](https://github.com/abseil/abseil-cpp/issues/848#issuecomment-761091854)
 Workaround by using `--features=-supports_dynamic_linker`
 
-- grpc
-
-```
-external/upb/upb/upb.h:39:3: error: '_Bool' is a C99 extension [-Werror,-Wc99-extensions]
-```
-
-See workaround here [jingchen2222/zetasql@`cf05607`#diff-a70ff1813d701c83652081d186aba748e180da906b69ec3b86e8d6383530d5e2](https://github.com/jingchen2222/zetasql/commit/cf05607f126a2d28ff25778b345ea1406650e94c#diff-a70ff1813d701c83652081d186aba748e180da906b69ec3b86e8d6383530d5e2)
-
 - bazel test //zetasql/parser/...
 
 ```
@@ -134,7 +126,6 @@ FAIL: //zetasql/parser:parser_standalone_type_test (see /private/var/tmp/_bazel_
 
 See workaround here:
 https://github.com/jingchen2222/zetasql/pull/3/files#diff-7ebc691e7f3f59ec4bc1719cb502fda627d8dcb1c4bbd4e2bc62370bcacaf6f1
-file: zetasql/parser/builddefs.bzl
 
 ### Use Zetasql as cmake dependency
 
@@ -296,7 +287,7 @@ the  `ROWS_RANGE` can be add into `frame_unit`.
 frame_unit:
     "ROWS" { $$ = zetasql::ASTWindowFrame::ROWS; }
     | "RANGE" { $$ = zetasql::ASTWindowFrame::RANGE; }
-    | "RANGE" { $$ = zetasql::ASTWindowFrame::ROWS_RANGE; }
+    | "ROWS_RANGE" { $$ = zetasql::ASTWindowFrame::ROWS_RANGE; }
     ;
 ```
 
@@ -612,6 +603,15 @@ If the tips above don't help, you can get more help from [slack channel](https:/
 
 We will discuss plan error tips in the furture works.
 
+## Test Cases
+
+- Zetasql parser have 120 test including 2948 cases (`zetasql/zetasql/parser/testdata`)
+- Hybridse have 10000+ integration cases
+- We will extend zetasql parser cases for new SQL traits (e.g. `LAST_JOIN`, `WINDOW ROWS_RANGE`, Index with ts key)
+- We might extend hybridse integration cases
+
+All cases mention above should be verify
+
 # Adoption strategy
 
 If we implement this proposal, it might bring some changes of APIs which is used by SparkFE and FEDB.
@@ -620,5 +620,9 @@ We will try to avoid introducing many changes, but there are still some changes:
 
 - In order to use zetasql, we might have to upgrade the OS and dependencies libraries. For example, `protobuf` upgrade from 2.x.x to 3.x.x. 
 - We will use standarddare SQL which might have conflict with hybridse original SQL syntax. For Instance,  `CREATE TABLE` Statement, `Index` and `Partition` options.
-
+- We might add some cases into integrations test framework
+- The docker will be upgrade:
+  - Using centos7 os
+  - Upgrade gcc to 8.0
+  - Installing zetasql and its dependencies
 
