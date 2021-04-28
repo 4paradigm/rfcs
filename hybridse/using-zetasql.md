@@ -54,7 +54,11 @@ We won't use zetasql analyer in this vesion for the following reasons:
 
 ## Build and Test zetasql parser
 
-In order to build and test in different sysmtem,  we can simplify build and test packages.  Check [Discussion link](https://github.com/4paradigm/HybridSE/discussions/42) for more details.
+In order to build and test in different sysmtem,  we can simplify build and test packages.  
+
+Check [Discussion link](https://github.com/4paradigm/HybridSE/discussions/42) for more details.
+
+Check [Building status](https://github.com/jingchen2222/zetasql/actions/runs/790319765)
 
 ### Linux
 
@@ -83,8 +87,6 @@ bazel test --test_summary=detailed  //zetasql/parser/...
 | Debian:buster | 8.31   | 2.28  | pass  | pass |      |
 | ArchLinux     | 10.2.0 | 2.33  | pass  | pass |      |
 
-Linux building status: https://github.com/aceforeverd/zetasql/actions/runs/750588862
-
 ### Mac
 
 ```
@@ -102,8 +104,6 @@ bazel test --test_summary=detailed --features=-supports_dynamic_linker //zetasql
 | os        | Clang                                           | build | test |      |
 | --------- | ----------------------------------------------- | ----- | ---- | ---- |
 | Mac:10.15 | Apple clang version 12.0.0 (clang-1200.0.32.21) | pass  | Pass |      |
-
-Mac building status: https://github.com/jingchen2222/zetasql/runs/2348401484?check_suite_focus=true
 
 ### Problems
 
@@ -400,7 +400,55 @@ table_constraint_definition:
 
   - **We sugguest design distribution options in standard SQL style.** 
 
-  - **We can but do not recommand implement  fedb's `table_options` in zetasql.**
+  - **We will implement  `table_options` syntax considering compatibility.**
+
+### Create Procedure
+
+```SQL
+create_procedure_statement:
+    "CREATE" opt_or_replace opt_create_scope "PROCEDURE" opt_if_not_exists
+    path_expression procedure_parameters opt_options_list begin_end_block
+      {
+        //...
+      }
+    ;
+procedure_parameter:
+    opt_procedure_parameter_mode identifier type_or_tvf_schema
+      {
+        /...
+      }
+    | opt_procedure_parameter_mode identifier procedure_parameter_termination
+      {
+        //...
+      }
+    ;
+opt_procedure_parameter_mode:
+    "IN" {$$ = ::zetasql::ASTFunctionParameter::ProcedureParameterMode::IN;}
+    | "OUT"
+      {$$ = ::zetasql::ASTFunctionParameter::ProcedureParameterMode::OUT;}
+    | "INOUT"
+      {$$ = ::zetasql::ASTFunctionParameter::ProcedureParameterMode::INOUT;}
+    | /* nothing */
+      {$$ = ::zetasql::ASTFunctionParameter::ProcedureParameterMode::NOT_SET;}
+    ;
+
+```
+
+```SQL
+CREATE PROCEDURE procedure_name(OUT param_a int32)
+BEGIN
+	//...
+END
+```
+
+It's easy to implement hybridse's `CREATE PROCEDURE` by adding `CONST` into`  opt_procedure_parameter_mode`
+
+```SQL
+CREATE PROCEDURE procedure_name(CONST param_a int32)
+BEGIN
+	//...
+END
+```
 
 
 
@@ -603,7 +651,7 @@ If the tips above don't help, you can get more help from [slack channel](https:/
 
 We will discuss plan error tips in the furture works.
 
-## Test Cases
+## Test
 
 - Zetasql parser have 120 test including 2948 cases (`zetasql/zetasql/parser/testdata`)
 - Hybridse have 10000+ integration cases
