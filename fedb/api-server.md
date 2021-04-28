@@ -13,20 +13,20 @@ HTTP interface is one of the most friendly interface and many developers like us
 
 
 ## Interface design
-HTTP URL: http://ip:port/sql/{method_name}?db={db_name}&table={table_name}
-
-HTTP Method: POST
 
 ### Put
-reqeust url: http://ip:port/sql/put?db={db_name}&table={table_name}  
+reqeust url: http://ip:port/sql/put/{db_name}/{table_name}  
 request body: 
 ```
 {
-    "value": {
-        "field1": "value1",
-        "field2": 111,
-        "field3": 1.4   
-    }
+    "value": [{
+        "field1": "value1", //string
+        "field2": 111,  // int
+        "field3": 1.4,  // float/double
+        "field4": "2021-04-27"  //date
+        "field5": "2021-04-27T08:03:15+00:00"  //timestamp
+        "field6": true // bool
+    }]
 
 }
 ```
@@ -39,18 +39,13 @@ response
 ```
 
 ### Execute procedure 
-reqeust url: http://ip:port/sql/execute_procedure?db={db_name}&table={table_name}  
+reqeust url: http://ip:port/sql/execute_procedure/{db_name}/{procedure_name}  
 request body: 
 ```
 {
-    "value": {
-        "name": "procedure_name",
-        "input": {
-            "id":123,
-            "field1": "value1"
-        }
-    }
-
+    "common_cols":["value1", "value2"],
+    "input": [["value1", "value2"],["value1", "value2"]],
+    "need_schema": true
 }
 ```
 response
@@ -58,33 +53,27 @@ response
 {
     "code": 0,
     "msg": "ok",
-    "data": [{"field1" : "value1"}, {"field1": "value2"}]
+    "schema": [{"field1":"bool"}, {"field2":"int32"}],
+    "data": [["value1", "value2"], [...]]
 }
 ```
-### Execute SQL
-reqeust url: http://ip:port/sql/execute_sql?db={db_name}&table={table_name}  
-request body: 
 
-```
-{
-    "data": {
-        "sql": "select * from t1"
-        "input": {
-            "id":123,
-            "field1": "value1"
-        }
-    }
-
-}
-```
+### Get Procedure
+request url: http://ip:port/sql/get_procedure/{db_name}/{procedure_name}   
 response
 ```
 {
     "code": 0,
     "msg": "ok",
-    "data": [{"field1" : "value1"}, {"field1": "value2"}] 
+    "name": "procedure_name",
+    "procedure": "xxxxx",
+    "common_col": ["field1", "field2"],
+    "input_schema": [{"field1":"bool"}, {"field2":"int"}],
+    "output_schema": [{"field1": "bool"}, {"field2": "int"}],
+    "tables": ["table1", "table2"]
 }
 ```
+
 
 ## Server design
 
@@ -99,8 +88,8 @@ We use [brpc HTTP Service](https://github.com/apache/incubator-brpc/blob/master/
 
     service APIService {
         rpc Put(HttpRequest) returns (HttpResponse);
-        rpc ExeSQL(HttpRequest) returns (HttpResponse);
         rpc ExeProcedure(HttpRequest) returns (HttpResponse);
+        rpc GetProcedure(HttpRequest) returns (HttpResponse);
     }
     ```
 2. Implement the service  
@@ -118,14 +107,14 @@ We use [brpc HTTP Service](https://github.com/apache/incubator-brpc/blob/master/
             // parse request attachment
             ...
         }
-        virtual void ExeSQL(google::protobuf::RpcController* controller,
+        virtual void ExeProcedure(google::protobuf::RpcController* controller,
                                 const HttpRequest* request,
                                 HttpResponse* response,
                                 google::protobuf::Closure* done) {
             // parse request attachment
             ...
         }
-        virtual void ExeProcedure(google::protobuf::RpcController* controller,
+        virtual void GetProcedure(google::protobuf::RpcController* controller,
                                 const HttpRequest* request,
                                 HttpResponse* response,
                                 google::protobuf::Closure* done) {
@@ -140,8 +129,8 @@ We use [brpc HTTP Service](https://github.com/apache/incubator-brpc/blob/master/
     if (server.AddService(&api_svc,
                       brpc::SERVER_DOESNT_OWN_SERVICE,
                       "/sql/put               => Put,"
-                      "/sql/execute_sql       => ExeSQL,"
-                      "/sql/execute_procedure => ExeProcedure") != 0) {
+                      "/sql/execute_procedure => ExeProcedure,"
+                      "/sql/get_procedure     => GetProcedure") != 0) {
         LOG(ERROR) << "Fail to add api service";
         return -1;
     }
