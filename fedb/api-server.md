@@ -9,21 +9,43 @@
 
 HTTP interface is one of the most friendly interface and many developers like using http interface to develop their program. REST API also help us to show demo simply. So we want to support uing http api to access FEDB.
 
-# Detailed design
+# Detailed Design
 
+## Interface Design
 
-## Interface design
+### Schema Mapping
+|FEDB type|Json type|
+|---|---|
+|string|String|
+|smallint|Number|
+|int|Number|
+|bigint|Number|
+|float|Number|
+|double|Number|
+|bool|Boolean|
+|null|null|
+|date|String|
+|timestamp|String|
+
+JSON does not have a built-in type for date/timestamp values. We store the date/timestamp value as a string in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format, e.g 2021-05-06, 2021-05-06T00:02:32Z.
+
+### HTTP Status 
+|code|message|
+|--|--|
+|200|ok|
+|404|page not found|
 
 ### Put
-reqeust url: http://ip:port/sql/put/{db_name}/{table_name}  
+reqeust url: http://ip:port/db/{db_name}/table/{table_name}  
+http method: PUT
 request body: 
 ```
 {
     "value": [{
-        "field1": "value1", //string
+        "field1": "value1", // string
         "field2": 111,  // int
         "field3": 1.4,  // float/double
-        "field4": "2021-04-27"  //date
+        "field4": "2021-04-27"  // date
         "field5": "2021-04-27T08:03:15+00:00"  //timestamp
         "field6": true // bool
     }]
@@ -38,8 +60,14 @@ response
 }
 ```
 
-### Execute procedure 
-reqeust url: http://ip:port/sql/execute_procedure/{db_name}/{procedure_name}  
+|code|message|
+|--|--|
+|0|ok|
+|1|get insert information failed|
+
+### Execute Procedure 
+reqeust url: http://ip:port/db/{db_name}/procedure/{procedure_name}  
+http method: POST  
 request body: 
 ```
 {
@@ -53,27 +81,39 @@ response
 {
     "code": 0,
     "msg": "ok",
-    "schema": [{"field1":"bool"}, {"field2":"int32"}],
-    "data": [["value1", "value2"], [...]]
+    "data": {
+        "schema": [{"field1":"bool"}, {"field2":"int32"}],
+        "data": [["value1", "value2"], [...]]
+    }
 }
 ```
+|code|message|
+|--|--|
+|0|ok|
+|-1|execute procedure failed|
 
 ### Get Procedure
-request url: http://ip:port/sql/get_procedure/{db_name}/{procedure_name}   
+request url: http://ip:port/db/{db_name}/procedure/{procedure_name}   
+http method: Get
 response
 ```
 {
     "code": 0,
     "msg": "ok",
-    "name": "procedure_name",
-    "procedure": "xxxxx",
-    "common_col": ["field1", "field2"],
-    "input_schema": [{"field1":"bool"}, {"field2":"int"}],
-    "output_schema": [{"field1": "bool"}, {"field2": "int"}],
-    "tables": ["table1", "table2"]
+    "data":{
+        "name": "procedure_name",
+        "procedure": "xxxxx",
+        "common_col": ["field1", "field2"],
+        "input_schema": [{"name":"field1", "type":"bool"}, {"name":"filed1", "type":"int32"}],
+        "output_schema": [{"field1": "bool"}, {"field2": "int32"}],
+        "tables": ["table1", "table2"]
+    }
 }
 ```
-
+|code|message|
+|--|--|
+|0|ok|
+|-1|procedure not found|
 
 ## Server design
 
@@ -87,9 +127,8 @@ We use [brpc HTTP Service](https://github.com/apache/incubator-brpc/blob/master/
     message HttpResponse { };
 
     service APIService {
-        rpc Put(HttpRequest) returns (HttpResponse);
-        rpc ExeProcedure(HttpRequest) returns (HttpResponse);
-        rpc GetProcedure(HttpRequest) returns (HttpResponse);
+        rpc ProcessTable(HttpRequest) returns (HttpResponse);
+        rpc ProcessProcedure(HttpRequest) returns (HttpResponse);
     }
     ```
 2. Implement the service  
@@ -100,26 +139,36 @@ We use [brpc HTTP Service](https://github.com/apache/incubator-brpc/blob/master/
             // init the sdk
             ...
         }
-        virtual void Put(google::protobuf::RpcController* controller,
+        virtual void ProcessTable(google::protobuf::RpcController* controller,
                                 const HttpRequest* request,
                                 HttpResponse* response,
                                 google::protobuf::Closure* done) {
-            // parse request attachment
-            ...
+            swich (cntl->http_request().method()) {
+
+                case HTTP_METHOD_PUT):
+                    // parse request attachment and put data
+                    ...
+                    break;
+                default:
+                    // log error
+                    break;
+            }
         }
-        virtual void ExeProcedure(google::protobuf::RpcController* controller,
+        virtual void ProcessProcedure(google::protobuf::RpcController* controller,
                                 const HttpRequest* request,
                                 HttpResponse* response,
                                 google::protobuf::Closure* done) {
-            // parse request attachment
-            ...
-        }
-        virtual void GetProcedure(google::protobuf::RpcController* controller,
-                                const HttpRequest* request,
-                                HttpResponse* response,
-                                google::protobuf::Closure* done) {
-            // parse request attachment
-            ...
+            switch (cntl->http_request().method()) {
+                case brpc::HTTP_METHOD_GET:
+                    // get procedure info
+                    break;
+                case brpc::HTTP_METHOD_POST:
+                    // execute procedure
+                    break;
+                default:
+                    // log error
+                    break;
+            }
         }
     };
     ```
@@ -128,9 +177,8 @@ We use [brpc HTTP Service](https://github.com/apache/incubator-brpc/blob/master/
     ```
     if (server.AddService(&api_svc,
                       brpc::SERVER_DOESNT_OWN_SERVICE,
-                      "/sql/put               => Put,"
-                      "/sql/execute_procedure => ExeProcedure,"
-                      "/sql/get_procedure     => GetProcedure") != 0) {
+                      "/db/*/table     => ProcessTable,"
+                      "/db/*/procedure => ProcessProcedure") != 0) {
         LOG(ERROR) << "Fail to add api service";
         return -1;
     }
