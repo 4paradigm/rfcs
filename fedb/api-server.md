@@ -34,25 +34,26 @@ JSON does not have a built-in type for date/timestamp values. We store the date/
 |--|--|
 |200|ok|
 |404|page not found|
+|408|request timeout|
 
 ### Put
 reqeust url: http://ip:port/db/{db_name}/table/{table_name}  
-http method: PUT
+http method: PUT  
 request body: 
 ```
 {
     "value": [{
-        "field1": "value1", // string
-        "field2": 111,  // int
-        "field3": 1.4,  // float/double
-        "field4": "2021-04-27"  // date
-        "field5": "2021-04-27T08:03:15+00:00"  //timestamp
-        "field6": true // bool
+        "field1": "value1",
+        "field2": 111,
+        "field3": 1.4,
+        "field4": "2021-04-27",
+        "field5": "2021-04-27T08:03:15+00:00",
+        "field6": true
     }]
 
 }
 ```
-response
+response:
 ```
 {
     "code": 0,
@@ -76,7 +77,7 @@ request body:
     "need_schema": true
 }
 ```
-response
+response:
 ```
 {
     "code": 0,
@@ -94,8 +95,8 @@ response
 
 ### Get Procedure
 request url: http://ip:port/db/{db_name}/procedure/{procedure_name}   
-http method: Get
-response
+http method: Get  
+response:
 ```
 {
     "code": 0,
