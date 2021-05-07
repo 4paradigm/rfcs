@@ -667,7 +667,7 @@ If we implement this proposal, it might bring some changes of APIs which is used
 We will try to avoid introducing many changes, but there are still some changes:
 
 - In order to use zetasql, we might have to upgrade the OS and dependencies libraries. For example, `protobuf` upgrade from 2.x.x to 3.x.x. 
-- We will use standarddare SQL which might have conflict with hybridse original SQL syntax. For Instance,  `CREATE TABLE` Statement, `Index` and `Partition` options.
+- We will use standard SQL which might have conflict with hybridse original SQL syntax. For Instance,  `CREATE TABLE` Statement, `Index` and `Partition` options.
 - We might add some cases into integrations test framework
 - The docker will be upgrade:
   - Using centos7 os
