@@ -73,7 +73,7 @@ request body:
 ```
 {
     "common_cols":["value1", "value2"],
-    "input": [["value1", "value2"],["value1", "value2"]],
+    "input": [["value0", "value3"],["value0", "value3"]],
     "need_schema": true
 }
 ```
@@ -106,7 +106,7 @@ response:
         "procedure": "xxxxx",
         "common_col": ["field1", "field2"],
         "input_schema": [{"name":"field1", "type":"bool"}, {"name":"filed1", "type":"int32"}],
-        "output_schema": [{"field1": "bool"}, {"field2": "int32"}],
+        "output_schema": [{"name":"field1", "type":"bool"}, {"name":"field2", "type":"int32"}],
         "tables": ["table1", "table2"]
     }
 }
@@ -128,8 +128,7 @@ We use [brpc HTTP Service](https://github.com/apache/incubator-brpc/blob/master/
     message HttpResponse { };
 
     service APIService {
-        rpc ProcessTable(HttpRequest) returns (HttpResponse);
-        rpc ProcessProcedure(HttpRequest) returns (HttpResponse);
+        rpc ProcessSQL(HttpRequest) returns (HttpResponse);
     }
     ```
 2. Implement the service  
@@ -140,36 +139,11 @@ We use [brpc HTTP Service](https://github.com/apache/incubator-brpc/blob/master/
             // init the sdk
             ...
         }
-        virtual void ProcessTable(google::protobuf::RpcController* controller,
+        virtual void ProcessSQL(google::protobuf::RpcController* controller,
                                 const HttpRequest* request,
                                 HttpResponse* response,
                                 google::protobuf::Closure* done) {
-            swich (cntl->http_request().method()) {
-
-                case HTTP_METHOD_PUT):
-                    // parse request attachment and put data
-                    ...
-                    break;
-                default:
-                    // log error
-                    break;
-            }
-        }
-        virtual void ProcessProcedure(google::protobuf::RpcController* controller,
-                                const HttpRequest* request,
-                                HttpResponse* response,
-                                google::protobuf::Closure* done) {
-            switch (cntl->http_request().method()) {
-                case brpc::HTTP_METHOD_GET:
-                    // get procedure info
-                    break;
-                case brpc::HTTP_METHOD_POST:
-                    // execute procedure
-                    break;
-                default:
-                    // log error
-                    break;
-            }
+            // parse url and dispach
         }
     };
     ```
@@ -178,8 +152,7 @@ We use [brpc HTTP Service](https://github.com/apache/incubator-brpc/blob/master/
     ```
     if (server.AddService(&api_svc,
                       brpc::SERVER_DOESNT_OWN_SERVICE,
-                      "/db/*/table     => ProcessTable,"
-                      "/db/*/procedure => ProcessProcedure") != 0) {
+                      "/db/*  => ProcessSQL" != 0) {
         LOG(ERROR) << "Fail to add api service";
         return -1;
     }
