@@ -37,7 +37,7 @@ JSON does not have a built-in type for date/timestamp values. We store the date/
 |408|request timeout|
 
 ### Put
-reqeust url: http://ip:port/db/{db_name}/table/{table_name}  
+reqeust url: http://ip:port/dbs/{db_name}/tables/{table_name}  
 http method: PUT  
 request body: 
 ```
@@ -67,7 +67,7 @@ response:
 |1|get insert information failed|
 
 ### Execute Procedure 
-reqeust url: http://ip:port/db/{db_name}/procedure/{procedure_name}  
+reqeust url: http://ip:port/dbs/{db_name}/procedures/{procedure_name}  
 http method: POST  
 request body: 
 ```
@@ -94,7 +94,7 @@ response:
 |-1|execute procedure failed|
 
 ### Get Procedure
-request url: http://ip:port/db/{db_name}/procedure/{procedure_name}   
+request url: http://ip:port/dbs/{db_name}/procedures/{procedure_name}   
 http method: Get  
 response:
 ```
@@ -152,7 +152,7 @@ We use [brpc HTTP Service](https://github.com/apache/incubator-brpc/blob/master/
     ```
     if (server.AddService(&api_svc,
                       brpc::SERVER_DOESNT_OWN_SERVICE,
-                      "/db/*  => ProcessSQL" != 0) {
+                      "/dbs/*  => ProcessSQL" != 0) {
         LOG(ERROR) << "Fail to add api service";
         return -1;
     }
