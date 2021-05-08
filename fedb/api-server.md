@@ -85,7 +85,7 @@ response:
     "data": {
         "schema": [{"field1":"bool"}, {"field2":"int32"}],
         "data": [["value1", "value2"], [...]],
-        "common_cols": ["value1"]
+        "common_cols_data": ["value1"]
     }
 }
 ```
