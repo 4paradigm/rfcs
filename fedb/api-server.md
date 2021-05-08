@@ -25,9 +25,9 @@ HTTP interface is one of the most friendly interface and many developers like us
 |bool|Boolean|
 |null|null|
 |date|String|
-|timestamp|String|
+|timestamp|Number|
 
-JSON does not have a built-in type for date/timestamp values. We store the date/timestamp value as a string in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format, e.g 2021-05-06, 2021-05-06T00:02:32Z.
+JSON does not have a built-in type for date/timestamp values. We store the date value as a String in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format and store the timestamp as a Number, e.g '2021-05-06', 1620471840256.
 
 ### HTTP Status 
 |code|message|
@@ -47,7 +47,7 @@ request body:
         "field2": 111,
         "field3": 1.4,
         "field4": "2021-04-27",
-        "field5": "2021-04-27T08:03:15+00:00",
+        "field5": 1620471840256,
         "field6": true
     }]
 
@@ -83,9 +83,9 @@ response:
     "code": 0,
     "msg": "ok",
     "data": {
-        "schema": [{"field1":"bool"}, {"field2":"int32"}],
+        "schema": [{"field1":"bool"}, {"field2":"int"}, {"name":"field3", "type":"bigint"}],
         "data": [["value1", "value2"], [...]],
-        "common_cols_data": ["value1"]
+        "common_cols_data": ["value3"]
     }
 }
 ```
@@ -105,10 +105,10 @@ response:
     "data":{
         "name": "procedure_name",
         "procedure": "xxxxx",
-        "input_schema": [{"name":"field1", "type":"bool"}, {"name":"filed1", "type":"int32"}],
+        "input_schema": [{"name":"field1", "type":"bool"}, {"name":"filed1", "type":"int"}],
         "input_common_cols": ["field1", "field2"],
-        "output_schema": [{"name":"field1", "type":"bool"}, {"name":"field2", "type":"int32"}],
-        "output_common_cols":["field"]
+        "output_schema": [{"name":"field1", "type":"bool"}, {"name":"field2", "type":"int32"}, {"name":"field3", "type":"bigint"}],
+        "output_common_cols":["field3"]
         "tables": ["table1", "table2"]
     }
 }
