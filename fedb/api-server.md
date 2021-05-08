@@ -84,7 +84,8 @@ response:
     "msg": "ok",
     "data": {
         "schema": [{"field1":"bool"}, {"field2":"int32"}],
-        "data": [["value1", "value2"], [...]]
+        "data": [["value1", "value2"], [...]],
+        "common_cols": ["value1"]
     }
 }
 ```
@@ -104,9 +105,10 @@ response:
     "data":{
         "name": "procedure_name",
         "procedure": "xxxxx",
-        "common_col": ["field1", "field2"],
         "input_schema": [{"name":"field1", "type":"bool"}, {"name":"filed1", "type":"int32"}],
+        "input_common_cols": ["field1", "field2"],
         "output_schema": [{"name":"field1", "type":"bool"}, {"name":"field2", "type":"int32"}],
+        "output_common_cols":["field"]
         "tables": ["table1", "table2"]
     }
 }
