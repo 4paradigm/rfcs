@@ -30,11 +30,7 @@ HTTP interface is one of the most friendly interface and many developers like us
 JSON does not have a built-in type for date/timestamp values. We store the date value as a String in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format and store the timestamp as a Number, e.g '2021-05-06', 1620471840256.
 
 ### HTTP Status 
-|code|message|
-|--|--|
-|200|ok|
-|404|page not found|
-|408|request timeout|
+API Server will return 200 in most case and store the error in the code of reponse's json.
 
 ### Put
 reqeust url: http://ip:port/dbs/{db_name}/tables/{table_name}  
