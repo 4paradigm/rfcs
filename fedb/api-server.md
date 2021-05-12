@@ -137,11 +137,11 @@ We use [brpc HTTP Service](https://github.com/apache/incubator-brpc/blob/master/
             // init the sdk
             ...
         }
-        virtual void ProcessSQL(google::protobuf::RpcController* controller,
+        virtual void Process(google::protobuf::RpcController* controller,
                                 const HttpRequest* request,
                                 HttpResponse* response,
                                 google::protobuf::Closure* done) {
-            // parse url and dispach
+            // parse url and dispatch
         }
     };
     ```
@@ -150,7 +150,7 @@ We use [brpc HTTP Service](https://github.com/apache/incubator-brpc/blob/master/
     ```
     if (server.AddService(&api_svc,
                       brpc::SERVER_DOESNT_OWN_SERVICE,
-                      "/dbs/*  => ProcessSQL" != 0) {
+                      "/dbs/*  => Process" != 0) {
         LOG(ERROR) << "Fail to add api service";
         return -1;
     }
