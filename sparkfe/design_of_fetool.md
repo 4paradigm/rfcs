@@ -61,6 +61,31 @@ Python package is able to meet the above requirements and easy to maintain. The 
     ......
 ```
 
+The command to install fetool should be `pip install fetool` or `pip3 install fetool`.
+
+The command-line should look like this.
+
+```
+$ fetool -h
+usage: fetool [-h]
+              {version,csv_to_parquet,sample_parquet,inspect_parquet,check_skew,benchmark}
+              ...
+
+positional arguments:
+  {version,csv_to_parquet,sample_parquet,inspect_parquet,check_skew,benchmark}
+    version             Print the version of fetool
+    csv_to_parquet      csv_to_parquet $input_csv_path $output_parquet_path
+    sample_parquet      sample_parquet $parquet_path
+    inspect_parquet     inspect_parquet $parquet_path
+    check_skew          check_skew $parquet_path
+    benchmark           benchmark $command
+
+optional arguments:
+  -h, --help            show this help message and exit
+```
+
+Developers can extend the functionality by adding new Python script to add sub-command for fetool.
+
 # Drawbacks
 
 Since it is the extension of SparkFE, there is no drawback for the existing core project.
