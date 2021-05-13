@@ -38,14 +38,14 @@ http method: PUT
 request body: 
 ```
 {
-    "value": [{
-        "field1": "value1",
-        "field2": 111,
-        "field3": 1.4,
-        "field4": "2021-04-27",
-        "field5": 1620471840256,
-        "field6": true
-    }]
+    "value": [[
+        "value1",
+        111,
+        1.4,
+        "2021-04-27",
+        1620471840256,
+        true
+    ]]
 
 }
 ```
