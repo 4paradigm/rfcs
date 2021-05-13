@@ -84,7 +84,7 @@ optional arguments:
   -h, --help            show this help message and exit
 ```
 
-Developers can extend the functionality by adding new Python script to add sub-command for fetool.
+Developers can extend the functionality by adding new Python scripts and sub-command for fetool.
 
 # Drawbacks
 
