@@ -1,6 +1,6 @@
 - Start Date: 2021-05-13
 - Target Major Version: 1.0
-- Reference Issues: https://github.com/4paradigm/SparkFE/issues/69
+- Reference Issues: https://github.com/4paradigm/SparkFE/issues/58 and https://github.com/4paradigm/SparkFE/issues/69
 - Implementation PR: 
 
 # Summary
@@ -16,7 +16,7 @@ Users can use fetool command to create FEDB DDL of creating tables.
 fetool gen_ddl sql.yaml
 ```
 
-Users can use fetool command to finish the following tasks without developing.
+Users can use fetool command to finish the following tasks without development.
 
 ```
 fetool csv_to_parquet /csv_files /parquet_files
