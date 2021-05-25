@@ -90,6 +90,8 @@ response:
 |0|ok|
 |-1|execute procedure failed|
 
+Note: If there is no common col, the reponse json will not contain common_cols_data field
+
 ### Get Procedure
 request url: http://ip:port/dbs/{db_name}/procedures/{procedure_name}   
 http method: Get  
@@ -113,6 +115,8 @@ response:
 |--|--|
 |0|ok|
 |-1|procedure not found|
+
+Note: If there is no common col, the reponse json will not contain input_common_cols/output_common_cols field
 
 ## Server design
 
