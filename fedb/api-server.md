@@ -79,7 +79,7 @@ response:
     "code": 0,
     "msg": "ok",
     "data": {
-        "schema": [{"field1":"bool"}, {"field2":"int"}, {"name":"field3", "type":"bigint"}],
+        "schema": [{"name": "field1", "type": "bool"}, {"name": "field2", "type": "int"}, {"name":"field3", "type": "bigint"}],
         "data": [["value1", "value2"], [...]],
         "common_cols_data": ["value3"]
     }
