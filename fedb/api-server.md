@@ -61,6 +61,7 @@ response:
 |--|--|
 |0|ok|
 |1|get insert information failed|
+Note: Put multi records to ApiServer is not supported. If put multi records in value array, the error will be return.
 
 ### Execute Procedure 
 reqeust url: http://ip:port/dbs/{db_name}/procedures/{procedure_name}  
