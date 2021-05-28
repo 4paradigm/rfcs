@@ -70,7 +70,7 @@ request body:
 {
     "common_cols":["value1", "value2"],
     "input": [["value0", "value3"],["value0", "value3"]],
-    "need_schema": true
+    "need_schema": false
 }
 ```
 response:
