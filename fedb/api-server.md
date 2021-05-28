@@ -154,7 +154,7 @@ We use [brpc HTTP Service](https://github.com/apache/incubator-brpc/blob/master/
     ```
     if (server.AddService(&api_svc,
                       brpc::SERVER_DOESNT_OWN_SERVICE,
-                      "/dbs/*  => Process" != 0) {
+                      "/*  => Process" != 0) {
         LOG(ERROR) << "Fail to add api service";
         return -1;
     }
