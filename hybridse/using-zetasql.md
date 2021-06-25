@@ -38,7 +38,7 @@ ZetaSQL is a SQL Analyzer Framework from Google. We are considering using it as 
 
 We do some survey on ZetaSQL. ZetaSQL provides many APIs and services. 
 
-![zetasql analyzer workflow](./images/image-zetasql-workflow.png)
+![zetasql analyzer workflow](../images/image-zetasql-workflow.png)
 
 The figure above demonstrate the zetasql's analyze workflow. But we **only** use its parser module, since It can fullfill our requirements.
 
@@ -163,7 +163,7 @@ ZetaSQL supports standard ANSI SQL.  We are going to integrate zetasql's parser 
 2. Transform `ASTStatement` into `LogicalPlan` .
 3. Convert `ASTExpression`  to `ExprNode` 
 
-![Figure2-use-zetasql-parser](./images/image-hybridse-new-parser.png)
+![Figure2-use-zetasql-parser](../images/image-hybridse-new-parser.png)
 
 **Pros**:
 
